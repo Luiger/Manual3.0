@@ -3,48 +3,54 @@ import { Stack } from 'expo-router';
 import { useFonts, Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import { AuthProvider } from '../hooks/useAuth';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// Evita que la pantalla de splash se oculte automáticamente antes de que se carguen los assets
+// Mantenemos la pantalla de carga nativa visible mientras preparamos lo mínimo necesario.
 SplashScreen.preventAutoHideAsync();
 
-// Este es el layout raíz que envuelve toda la aplicación.
-// Utilizamos un Stack Navigator para manejar la navegación entre los diferentes "grupos" de rutas.
 export default function RootLayout() {
-  // Carga las fuentes que usaremos en la aplicación.
+  // Cargamos las fuentes para evitar parpadeos de texto en la app (buena práctica).
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
   });
 
-  // useEffect se usa para ocultar la pantalla de splash una vez que las fuentes están cargadas.
   useEffect(() => {
+    // Ocultamos la pantalla de carga una vez que las fuentes están listas.
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
 
-  // Si las fuentes no se han cargado, no renderizamos nada (la splash screen sigue visible).
+  // No renderizamos nada hasta que las fuentes estén cargadas.
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
-  // Stack.Screen define las rutas principales.
-  // (auth) es el grupo para login/registro.
-  // (tabs) es el grupo para la app principal (post-login).
-  // (profile) es el grupo para la sección de perfil.
-  // 'manual-form' es una pantalla específica que se puede abrir desde cualquier lugar.
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(profile)" options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="manual-form" 
-        options={{ 
-          presentation: 'modal', 
-          headerTitle: 'Manual de Contrataciones' 
-        }} 
-      />
-    </Stack>
+    // 1. AuthProvider sigue siendo necesario para que el resto de la app
+    // (Login, Formularios, etc.) pueda gestionar la sesión.
+    <AuthProvider>
+      {/* 2. GestureHandlerRootView es requerido por el Stack Navigator para
+          funcionar correctamente. Es una excelente práctica incluirlo aquí. */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {/* 3. SafeAreaProvider asegura que los SafeAreaView en toda la app
+            funcionen de manera óptima. */}
+        <SafeAreaProvider>
+          <Stack>
+            {/* Definimos nuestros grupos de rutas y pantallas */}
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(profile)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="manual-form" // Corregido para coincidir con nuestro nombre de archivo
+              options={{ title: 'Manual de Contrataciones' }}
+            />
+          </Stack>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </AuthProvider>
   );
 }

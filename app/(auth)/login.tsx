@@ -2,33 +2,42 @@
 import React, { useState } from 'react';
 import {
   View, Text, Image, TextInput, TouchableOpacity, SafeAreaView,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert
+  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router'; // 1. Volvemos a importar useRouter
 import Colors from '../../constants/Colors';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
-  // Hook de Expo Router para manejar la navegación programática
-  const router = useRouter();
+  const { login, isLoading } = useAuth();
+  const router = useRouter(); // 2. Inicializamos el router
 
-  // Estados para los inputs y la visibilidad de la contraseña
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  // Función para manejar el inicio de sesión
-  const handleLogin = () => {
-    // Lógica de validación simple
+  const handleLogin = async () => {
+    if (isLoading) return;
+
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor, ingresa tu correo y contraseña.');
+      Alert.alert('Campos incompletos', 'Por favor, ingresa tu correo y contraseña.');
       return;
     }
-    console.log('Login attempt:', { email, password });
-    // Navegación al home. 'replace' evita que el usuario pueda volver a la pantalla de login.
-    router.replace('/(tabs)/home');
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      // 3. SI EL LOGIN ES EXITOSO, NAVEGAMOS MANUALMENTE
+      // Usamos 'replace' para que el usuario no pueda volver atrás a la pantalla de login.
+      router.replace('/(tabs)/home');
+    } else {
+      // Si falla, mostramos el error que viene del backend.
+      Alert.alert('Error de inicio de sesión', result.error || 'Ocurrió un error inesperado.');
+    }
   };
 
+  // El resto del componente (el JSX) se mantiene exactamente igual.
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -36,20 +45,18 @@ export default function LoginScreen() {
         style={styles.keyboardAvoiding}
       >
         <View style={styles.container}>
-          {/* Logo */}
+          {/* ... (Todo el JSX del logo, títulos y formulario sin cambios) ... */}
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
 
-          {/* Títulos */}
           <View style={styles.header}>
             <Text style={styles.title}>Bienvenido a Universitas</Text>
             <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
           </View>
 
-          {/* Formulario */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Correo electrónico</Text>
@@ -60,6 +67,7 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={!isLoading}
               />
             </View>
 
@@ -72,23 +80,31 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!isPasswordVisible}
+                  editable={!isLoading}
                 />
-                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} disabled={isLoading}>
                   <Feather name={isPasswordVisible ? 'eye-off' : 'eye'} size={22} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
           </View>
 
-          {/* Botón Iniciar Sesión */}
-          <TouchableOpacity onPress={handleLogin} style={styles.button} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          <TouchableOpacity
+            onPress={handleLogin}
+            style={[styles.button, isLoading && styles.buttonInactive]}
+            activeOpacity={0.8}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            )}
           </TouchableOpacity>
 
-          {/* Enlaces */}
           <View style={styles.linksContainer}>
             <Link href="/(auth)/forgot-password" asChild>
-                <TouchableOpacity>
+                <TouchableOpacity disabled={isLoading}>
                     <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
             </Link>
@@ -96,7 +112,7 @@ export default function LoginScreen() {
             <View style={styles.registerLinkContainer}>
                 <Text style={styles.registerText}>¿No tienes cuenta? </Text>
                 <Link href="/(auth)/register" asChild>
-                    <TouchableOpacity>
+                    <TouchableOpacity disabled={isLoading}>
                         <Text style={[styles.link, { fontWeight: 'bold' }]}>Regístrate</Text>
                     </TouchableOpacity>
                 </Link>
@@ -108,25 +124,28 @@ export default function LoginScreen() {
   );
 }
 
-// Hoja de estilos usando la API StyleSheet de React Native
+// Los estilos se mantienen igual
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   logo: { width: 200, height: 100, marginBottom: 40 },
   header: { width: '100%', marginBottom: 32 },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: Colors.text, fontFamily: 'Inter_700Bold' },
-  subtitle: { fontSize: 16, textAlign: 'center', color: Colors.textSecondary, marginTop: 8, fontFamily: 'Inter_400Regular' },
+  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: Colors.text },
+  subtitle: { fontSize: 16, textAlign: 'center', color: Colors.textSecondary, marginTop: 8 },
   form: { width: '100%', gap: 20 },
   inputGroup: {},
-  label: { fontSize: 16, fontWeight: '500', color: Colors.textSecondary, marginBottom: 8, fontFamily: 'Inter_400Regular' },
+  label: { fontSize: 16, fontWeight: '500', color: Colors.textSecondary, marginBottom: 8 },
   input: { height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, fontSize: 16 },
   passwordContainer: { flexDirection: 'row', alignItems: 'center', height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16 },
   passwordInput: { flex: 1, fontSize: 16 },
   button: { width: '100%', backgroundColor: Colors.primary, height: 56, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginTop: 32 },
-  buttonText: { color: Colors.textLight, fontSize: 18, fontWeight: 'bold', fontFamily: 'Inter_700Bold' },
+  buttonInactive: {
+    backgroundColor: '#cccccc',
+  },
+  buttonText: { color: Colors.textLight, fontSize: 18, fontWeight: 'bold' },
   linksContainer: { width: '100%', marginTop: 24, alignItems: 'center', gap: 16 },
-  link: { color: Colors.accent, fontSize: 16, fontWeight: '600', fontFamily: 'Inter_400Regular' },
+  link: { color: Colors.accent, fontSize: 16, fontWeight: '600' },
   registerLinkContainer: { flexDirection: 'row', alignItems: 'center' },
-  registerText: { color: Colors.textSecondary, fontSize: 16, fontFamily: 'Inter_400Regular' },
+  registerText: { color: Colors.textSecondary, fontSize: 16 },
 });
