@@ -9,88 +9,106 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Feather, FontAwesome5 } from '@expo/vector-icons'; // Librerías para los íconos
 import Colors from '../../constants/Colors';
 
-// --- DATOS DE LAS TARJETAS ---
+// --- DATOS DE LAS TARJETjetas ---
+// Se añade la información de íconos y variantes de botones según la guía.
 const cardData = [
   {
     id: '1',
+    icon: { family: Feather, name: 'file-text' },
     title: 'Manual Express',
     subtitle: 'Elabora tu Manual Express',
-    tag: '#UniversitasLegal',
-    footerText: 'Manual Express',
-    //action: (router) => router.push('/manual-form'),
-    action: () => console.log('Navegando al repositorio...'),
+    buttonText: 'Elaborar',
+    buttonVariant: 'express',
+    action: (router) => router.push('/manual-express-form'),
   },
   {
     id: '2',
     title: 'Manual PRO',
     subtitle: 'Elabora tu Manual PRO',
-    tag: '#UniversitasLegal',
-    footerText: 'Manual PRO',
+    icon: { family: Feather, name: 'file-text' },
+    buttonText: 'Elaborar',
+    buttonVariant: 'pro',
     action: (router) => router.push('/manual-form'),
   },
   {
     id: '3',
     title: 'Repositorio legal',
     subtitle: 'Consulta nuestro Repositorio Legal',
-    tag: '#UniversitasLegal',
-    footerText: 'Repositorio legal',
+    icon: { family: FontAwesome5, name: 'gavel' },
+    buttonText: 'Explorar',
+    buttonVariant: 'transparent',
     action: (router) => router.push('/repository'),
-    //action: () => console.log('Navegando al repositorio...'),
   },
   {
     id: '4',
     title: 'Soporte',
     subtitle: 'Soporte técnico',
-    tag: '#UniversitasLegal',
-    footerText: 'Soporte',
-    //action: (router) => router.push('/manual-form'),
-    action: () => console.log('Navegando al repositorio...'),
+    icon: { family: FontAwesome5, name: 'whatsapp' },
+    buttonText: 'Contactar',
+    buttonVariant: 'transparent',
+    action: () => console.log('Abriendo Soporte...'), // Acción futura
   },
   {
     id: '5',
     title: 'Asesoría',
     subtitle: 'Agenda una asesoría con nuestros expertos',
-    tag: '#UniversitasLegal',
-    footerText: 'Asesoría',
-    //action: (router) => router.push('/manual-form'),
-    action: () => console.log('Navegando al repositorio...'),
+    icon: { family: Feather, name: 'calendar' },
+    buttonText: 'Agendar',
+    buttonVariant: 'transparent',
+    action: () => console.log('Abriendo Asesoría...'), // Acción futura
   },
   {
     id: '6',
     title: 'Formación',
     subtitle: 'Conoce nuestros cursos',
-    tag: '#UniversitasLegal',
-    footerText: 'Formación',
+    icon: { family: Feather, name: 'laptop' },
+    buttonText: 'Ver cursos',
+    buttonVariant: 'transparent',
     action: (router) => router.push('/courses'),
-    //action: () => console.log('Navegando al repositorio...'),
   },
 ];
 
 // --- COMPONENTE REUTILIZABLE PARA LAS TARJETAS ---
-const Card = ({ title, subtitle, tag, footerText, onPress }) => (
-  <TouchableOpacity style={styles.cardWrapper} onPress={onPress} activeOpacity={0.8}>
-    <View style={styles.cardContainer}>
-      <View style={styles.cardBlueSection}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardDescription}>{subtitle}</Text>
-        <Text style={styles.cardHashtag}>{tag}</Text>
-      </View>
-      <View style={styles.cardWhiteSection}>
-        <Text style={styles.cardActionText}>{footerText}</Text>
+const Card = ({ icon, title, subtitle, buttonText, buttonVariant, onPress }) => {
+  const IconComponent = icon.family;
+  
+  const buttonStyle = [
+    styles.cardButton,
+    buttonVariant === 'express' && styles.buttonExpress,
+    buttonVariant === 'pro' && styles.buttonPro,
+    buttonVariant === 'transparent' && styles.buttonTransparent,
+  ];
+  
+  const buttonTextStyle = [
+    styles.cardButtonText,
+    buttonVariant === 'express' && styles.buttonTextExpress,
+    (buttonVariant === 'pro' || buttonVariant === 'transparent') && styles.buttonTextLight,
+  ];
+
+  return (
+    <View style={styles.cardWrapper}>
+      <View style={styles.cardContainer}>
+        <View>
+            <IconComponent name={icon.name} size={32} color={Colors.textLight} />
+            <Text style={styles.cardTitle}>{title}</Text>
+        </View>
+        <TouchableOpacity style={buttonStyle} onPress={onPress}>
+            <Text style={buttonTextStyle}>{buttonText}</Text>
+        </TouchableOpacity>
       </View>
     </View>
-  </TouchableOpacity>
-);
+  );
+};
 
 // --- PANTALLA PRINCIPAL ---
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right', 'top']}>
-      {/* Header Fijo */}
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/(profile)/menu')}>
           <View style={styles.avatar}>
@@ -101,16 +119,16 @@ export default function HomeScreen() {
         <Text style={styles.headerTitle}>Manuales de Contrataciones</Text>
       </View>
 
-      {/* Contenido Deslizable */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.cardRow}>
           {cardData.map(card => (
             <Card
               key={card.id}
+              icon={card.icon}
               title={card.title}
               subtitle={card.subtitle}
-              tag={card.tag}
-              footerText={card.footerText}
+              buttonText={card.buttonText}
+              buttonVariant={card.buttonVariant}
               onPress={() => card.action(router)}
             />
           ))}
@@ -156,6 +174,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: Colors.text,
+    fontFamily: 'Roboto_500Medium',
   },
   contentContainer: {
     padding: 8,
@@ -169,47 +188,48 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   cardContainer: {
-    borderRadius: 12,
-    backgroundColor: Colors.background,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    overflow: 'hidden',
-    flex: 1,
-  },
-  cardBlueSection: {
     backgroundColor: Colors.primary,
+    borderRadius: 12,
     padding: 16,
-    flexGrow: 1,
+    height: 220,
+    justifyContent: 'space-between',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   cardTitle: {
+    fontFamily: 'Roboto_700Bold',
     color: Colors.textLight,
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    marginTop: 8,
   },
-  cardDescription: {
-    color: Colors.textLight,
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  cardHashtag: {
-    color: Colors.textLight,
-    fontSize: 12,
-    opacity: 0.8,
-  },
-  cardWhiteSection: {
-    backgroundColor: Colors.background,
-    padding: 16,
+  cardButton: {
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    marginTop: 16,
   },
-  cardActionText: {
-    color: Colors.text,
-    fontSize: 16,
-    fontWeight: '600',
+  cardButtonText: {
+    fontFamily: 'Roboto_500Medium',
+    fontSize: 14,
+  },
+  buttonExpress: {
+    backgroundColor: Colors.accentExpress,
+  },
+  buttonTextExpress: {
+    color: Colors.primary,
+  },
+  buttonPro: {
+    backgroundColor: Colors.accentPRO,
+  },
+  buttonTransparent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  buttonTextLight: {
+    color: Colors.textLight,
   },
 });

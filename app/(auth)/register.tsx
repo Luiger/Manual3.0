@@ -19,7 +19,7 @@ import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '../../services/auth.service';
 import Colors from '../../constants/Colors';
 
-// --- Componente Stepper ---
+// ✅ Componente Stepper con estilos actualizados según la guía
 const Stepper = ({ currentStep }: { currentStep: number }) => (
   <View style={styles.stepperContainer}>
     <View style={styles.step}>
@@ -146,58 +146,122 @@ const RegisterCredentialsScreen = () => {
   );
 };
 
-// --- Estilos ---
+// ✅ Estilos completamente actualizados con la nueva paleta y tipografía
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
-  header: {
-    marginBottom: 24,
-  },
+  scrollContainer: { flexGrow: 1, padding: 24, justifyContent: 'space-between' },
+  header: { marginBottom: 24 },
   title: {
+    fontFamily: 'Roboto_700Bold',
     fontSize: 24,
-    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
     color: Colors.text,
   },
   subtitle: {
+    fontFamily: 'Roboto_400Regular',
     fontSize: 16,
     textAlign: 'center',
     color: Colors.textSecondary,
   },
-  form: {
-    marginTop: 32,
-  },
+  form: { marginTop: 32 },
   inputContainer: { marginBottom: 20 },
-  label: { fontSize: 16, color: Colors.textSecondary, marginBottom: 8 },
-  input: { height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: Colors.text },
-  passwordWrapper: { flexDirection: 'row', alignItems: 'center', height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16 },
-  passwordInput: { flex: 1, fontSize: 16, color: Colors.text },
-  footer: {
-    marginTop: 40,
+  label: {
+    fontFamily: 'Roboto_400Regular',
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 8,
   },
-  errorText: { color: Colors.error, textAlign: 'center', marginBottom: 10, fontSize: 14 },
-  button: { width: '100%', height: 56, backgroundColor: Colors.primary, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  input: {
+    height: 56,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontFamily: 'Roboto_400Regular',
+  },
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+  },
+  passwordInput: { flex: 1, fontSize: 16, fontFamily: 'Roboto_400Regular' },
+  footer: { marginTop: 40 },
+  errorText: { color: Colors.error, textAlign: 'center', marginBottom: 10, fontFamily: 'Roboto_400Regular' },
+  button: {
+    width: '100%',
+    height: 56,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   buttonDisabled: { backgroundColor: '#cccccc' },
-  buttonText: { color: Colors.textLight, fontSize: 18, fontWeight: 'bold' },
-  loginLinkContainer: { marginTop: 24, flexDirection: 'row', justifyContent: 'center' },
-  loginText: { color: Colors.textSecondary, fontSize: 16 },
-  loginLink: { color: Colors.accent, fontWeight: 'bold', fontSize: 16 },
-  stepperContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '80%', alignSelf: 'center' },
+  buttonText: {
+    fontFamily: 'Roboto_500Medium',
+    color: Colors.textLight,
+    fontSize: 16,
+  },
+  loginLinkContainer: {
+    marginTop: 24,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  loginText: {
+    fontFamily: 'Roboto_400Regular',
+    color: Colors.textSecondary,
+    fontSize: 14,
+  },
+  loginLink: {
+    fontFamily: 'Roboto_500Medium',
+    color: Colors.link,
+    fontSize: 14,
+  },
+  // Estilos del Stepper actualizados
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginTop: 24,
+    width: '80%',
+    alignSelf: 'center',
+  },
   step: { alignItems: 'center', flex: 1 },
-  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
-  stepCircleActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  stepText: { color: Colors.textSecondary, fontWeight: 'bold' },
-  stepTextActive: { color: Colors.textLight },
-  stepLabel: { marginTop: 8, color: Colors.textSecondary, fontSize: 12, textAlign: 'center' },
-  stepLabelActive: { color: Colors.primary, fontWeight: 'bold' },
-  stepperLine: { flex: 1, height: 2, backgroundColor: Colors.border, marginHorizontal: -20 },
+  stepCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#E5E7EB', // Gris claro para inactivo
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepCircleActive: {
+    backgroundColor: Colors.primary, // Azul principal para activo
+  },
+  stepText: {
+    fontFamily: 'Roboto_700Bold',
+    color: Colors.text, // Texto oscuro para inactivo
+  },
+  stepTextActive: {
+    color: Colors.textLight, // Texto blanco para activo
+  },
+  stepLabel: {
+    fontFamily: 'Roboto_400Regular',
+    marginTop: 8,
+    color: Colors.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  stepLabelActive: { fontFamily: 'Roboto_700Bold', color: Colors.primary },
+  stepperLine: { flex: 1, height: 2, backgroundColor: '#E5E7EB', marginTop: 15 },
 });
 
 export default RegisterCredentialsScreen;

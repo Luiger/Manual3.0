@@ -1,56 +1,50 @@
 // app/_layout.tsx
 import { Stack } from 'expo-router';
-import { useFonts, Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
-import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import { AuthProvider } from '../hooks/useAuth';
+import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvider } from '../hooks/useAuth';
 
-// Mantenemos la pantalla de carga nativa visible mientras preparamos lo mínimo necesario.
+// ✅ 1. Importa 'useFonts' y las fuentes Roboto que usaremos
+import { useFonts, Roboto_400Regular, Roboto_700Bold, Roboto_900Black, Roboto_500Medium, Roboto_300Light } from '@expo-google-fonts/roboto';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // Cargamos las fuentes para evitar parpadeos de texto en la app (buena práctica).
+  // ✅ 2. Carga las fuentes en la aplicación
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_700Bold,
+    Roboto_400Regular, // Peso Regular (400)
+    Roboto_500Medium,  // Peso Medium (500) - útil para Semibold
+    Roboto_700Bold,    // Peso Bold (700)
+    Roboto_900Black,   // Peso Black (900)
   });
 
   useEffect(() => {
-    // Ocultamos la pantalla de carga una vez que las fuentes están listas.
+    // Ocultamos la pantalla de carga solo cuando las fuentes estén listas.
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
 
-  // No renderizamos nada hasta que las fuentes estén cargadas.
+  // Si las fuentes no han cargado, no renderizamos nada para que el splash siga visible.
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
-    // 1. AuthProvider sigue siendo necesario para que el resto de la app
-    // (Login, Formularios, etc.) pueda gestionar la sesión.
     <AuthProvider>
-      {/* 2. GestureHandlerRootView es requerido por el Stack Navigator para
-          funcionar correctamente. Es una excelente práctica incluirlo aquí. */}
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {/* 3. SafeAreaProvider asegura que los SafeAreaView en toda la app
-            funcionen de manera óptima. */}
         <SafeAreaProvider>
           <Stack>
-            {/* Definimos nuestros grupos de rutas y pantallas */}
+            {/* El resto de la configuración del Stack se mantiene igual */}
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(profile)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="manual-form" // Corregido para coincidir con nuestro nombre de archivo
-              options={{ title: 'Manual de Contrataciones' }}
-            />
-            
+            <Stack.Screen name="manual-form" options={{ title: 'Manual de Contrataciones' }} />
             <Stack.Screen name="repository" options={{ title: 'Repositorio Legal' }} />
             <Stack.Screen name="courses" options={{ title: 'Cursos Virtuales' }} />
+            <Stack.Screen name="manual-express-form" options={{ title: 'Manual Express' }} />
           </Stack>
         </SafeAreaProvider>
       </GestureHandlerRootView>

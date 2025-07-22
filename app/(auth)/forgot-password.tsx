@@ -1,5 +1,3 @@
-// app/(auth)/forgot-password.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity,
@@ -14,7 +12,7 @@ import { Feather } from '@expo/vector-icons';
 import { AuthService } from '../../services/auth.service';
 import Colors from '../../constants/Colors';
 
-// --- Componente Stepper ---
+// --- Componente Stepper para 3 pasos ---
 const Stepper = ({ currentStep }: { currentStep: number }) => {
     const steps = ['Enviar correo', 'Código', 'Nueva Contraseña'];
     return (
@@ -45,6 +43,7 @@ const step3Schema = Yup.object({
 const ForgotPasswordScreen = () => {
     const router = useRouter();
     
+    // --- Lógica de estados y handlers (sin cambios funcionales) ---
     const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -56,7 +55,6 @@ const ForgotPasswordScreen = () => {
     const [error, setError] = useState('');
     const [isStepValid, setIsStepValid] = useState(false);
 
-    // Valida el formulario del paso actual en tiempo real
     useEffect(() => {
         let schema;
         let data;
@@ -73,7 +71,6 @@ const ForgotPasswordScreen = () => {
         setError('');
         await AuthService.forgotPassword(email);
         setLoading(false);
-        // Por seguridad, siempre avanzamos, incluso si el correo no existe.
         setStep(2);
     };
 
@@ -108,17 +105,18 @@ const ForgotPasswordScreen = () => {
                 { text: 'OK', onPress: () => router.replace('/(auth)/login') }
             ]);
         } else {
-            setError(result.error || 'Ocurrió un error al restablecer la contraseña.');
+            setError(result.error || 'Ocurrió un error.');
         }
         setLoading(false);
     };
 
+    // --- Renderizado de cada paso ---
     const renderStepContent = () => {
         switch (step) {
             case 1:
                 return (
                     <>
-                        <Text style={styles.title}>Recuperar Contraseña</Text>
+                        <Text style={styles.title}>Recuperar contraseña</Text>
                         <Text style={styles.subtitle}>Ingresa el correo electrónico asociado a tu cuenta.</Text>
                         <Stepper currentStep={1} />
                         <View style={styles.inputContainer}><Text style={styles.label}>Correo electrónico</Text><TextInput style={styles.input} placeholder="Ingresa tu correo" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" /></View>
@@ -130,7 +128,7 @@ const ForgotPasswordScreen = () => {
             case 2:
                 return (
                     <>
-                        <Text style={styles.title}>Verificar Código</Text>
+                        <Text style={styles.title}>Verificar código</Text>
                         <Text style={styles.subtitle}>Hemos enviado un código a <Text style={{fontWeight: 'bold'}}>{email}</Text></Text>
                         <Stepper currentStep={2} />
                         <View style={styles.inputContainer}><Text style={styles.label}>Código de Verificación</Text><TextInput style={styles.input} placeholder="123456" value={otp} onChangeText={setOtp} keyboardType="number-pad" maxLength={6} /></View>
@@ -142,18 +140,17 @@ const ForgotPasswordScreen = () => {
             case 3:
                 return (
                     <>
-                        <Text style={styles.title}>Establecer Nueva Contraseña</Text>
+                        <Text style={styles.title}>Establecer nueva contraseña</Text>
                         <Text style={styles.subtitle}>Tu nueva contraseña debe ser segura.</Text>
                         <Stepper currentStep={3} />
                         <View style={styles.inputContainer}><Text style={styles.label}>Nueva Contraseña</Text><View style={styles.passwordWrapper}><TextInput style={styles.passwordInput} placeholder="Mínimo 8 caracteres" value={password} onChangeText={setPassword} secureTextEntry={!isPasswordVisible} /><TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}><Feather name={isPasswordVisible ? 'eye-off' : 'eye'} size={22} color={Colors.textSecondary} /></TouchableOpacity></View></View>
                         <View style={styles.inputContainer}><Text style={styles.label}>Confirmar Nueva Contraseña</Text><View style={styles.passwordWrapper}><TextInput style={styles.passwordInput} placeholder="Confirma tu nueva contraseña" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={!isConfirmPasswordVisible} /><TouchableOpacity onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}><Feather name={isConfirmPasswordVisible ? 'eye-off' : 'eye'} size={22} color={Colors.textSecondary} /></TouchableOpacity></View></View>
                         <TouchableOpacity style={[styles.button, !isStepValid && styles.buttonDisabled]} onPress={handleResetPassword} disabled={!isStepValid || loading}>
-                            {loading ? <ActivityIndicator color={Colors.textLight} /> : <Text style={styles.buttonText}>Actualizar Contraseña</Text>}
+                            {loading ? <ActivityIndicator color={Colors.textLight} /> : <Text style={styles.buttonText}>Actualizar contraseña</Text>}
                         </TouchableOpacity>
                     </>
                 );
-            default:
-                return null;
+            default: return null;
         }
     };
 
@@ -169,30 +166,31 @@ const ForgotPasswordScreen = () => {
     );
 };
 
+// ✅ Estilos actualizados con la nueva paleta y tipografía
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  scrollContainer: { flexGrow: 1, padding: 24, paddingTop: 32 },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', color: Colors.text, marginBottom: 8 },
-  subtitle: { fontSize: 16, color: Colors.textSecondary, textAlign: 'center', marginBottom: 24 },
+  scrollContainer: { flexGrow: 1, padding: 24, paddingTop: 16 },
+  title: { fontFamily: 'Roboto_700Bold', fontSize: 24, textAlign: 'center', color: Colors.text, marginBottom: 8 },
+  subtitle: { fontFamily: 'Roboto_400Regular', fontSize: 16, color: Colors.textSecondary, textAlign: 'center', marginBottom: 24 },
   stepperContainer: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', marginBottom: 32, width: '100%' },
   step: { alignItems: 'center', flex: 1 },
-  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
-  stepCircleActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  stepText: { color: Colors.textSecondary, fontWeight: 'bold' },
+  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E5E7EB', justifyContent: 'center', alignItems: 'center' },
+  stepCircleActive: { backgroundColor: Colors.primary },
+  stepText: { fontFamily: 'Roboto_700Bold', color: Colors.text },
   stepTextActive: { color: Colors.textLight },
-  stepLabel: { marginTop: 8, color: Colors.textSecondary, fontSize: 12, textAlign: 'center' },
-  stepLabelActive: { color: Colors.primary, fontWeight: 'bold' },
-  stepperLine: { flex: 1, height: 2, backgroundColor: Colors.border, marginTop: 15 },
+  stepLabel: { fontFamily: 'Roboto_400Regular', marginTop: 8, color: Colors.textSecondary, fontSize: 12, textAlign: 'center' },
+  stepLabelActive: { fontFamily: 'Roboto_700Bold', color: Colors.primary },
+  stepperLine: { flex: 1, height: 2, backgroundColor: '#E5E7EB', marginTop: 15 },
   inputContainer: { marginBottom: 20 },
-  label: { fontSize: 16, color: Colors.textSecondary, marginBottom: 8 },
-  input: { height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: Colors.text },
-  passwordWrapper: { flexDirection: 'row', alignItems: 'center', height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16 },
-  passwordInput: { flex: 1, fontSize: 16, color: Colors.text },
-  button: { width: '100%', height: 56, backgroundColor: Colors.primary, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  label: { fontFamily: 'Roboto_400Regular', fontSize: 14, color: Colors.textSecondary, marginBottom: 8 },
+  input: { height: 56, backgroundColor: '#FFF', borderWidth: 1, borderColor: Colors.border, borderRadius: 8, paddingHorizontal: 16, fontSize: 16, fontFamily: 'Roboto_400Regular' },
+  passwordWrapper: { flexDirection: 'row', alignItems: 'center', height: 56, backgroundColor: '#FFF', borderWidth: 1, borderColor: Colors.border, borderRadius: 8, paddingHorizontal: 16 },
+  passwordInput: { flex: 1, fontSize: 16, fontFamily: 'Roboto_400Regular' },
+  button: { width: '100%', height: 56, backgroundColor: Colors.primary, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
   buttonDisabled: { backgroundColor: '#cccccc' },
-  buttonText: { color: Colors.textLight, fontSize: 18, fontWeight: 'bold' },
-  errorText: { color: Colors.error, textAlign: 'center', marginTop: 20, fontSize: 14 },
+  buttonText: { fontFamily: 'Roboto_500Medium', color: Colors.textLight, fontSize: 16 },
+  errorText: { fontFamily: 'Roboto_400Regular', color: Colors.error, textAlign: 'center', marginTop: 20, fontSize: 14 },
 });
 
 export default ForgotPasswordScreen;

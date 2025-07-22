@@ -33,7 +33,36 @@ const checkSubmissionStatus = async () => {
   }
 };
 
+const submitManualExpress = async (formData) => {
+  try {
+    const response = await apiClient.post('/manuales/express/submit', formData);
+    return response.data;
+  } catch (error) {
+    const errorMessage = axios.isAxiosError(error) ? error.response?.data?.message : 'Error al enviar el formulario.';
+    return { success: false, error: errorMessage };
+  }
+};
+
+// ✅ Añade 'isRestrictionActive' a la interfaz
+interface StatusCheckResponse {
+  hasSubmitted: boolean;
+  isRestrictionActive: boolean;
+}
+
+const checkExpressSubmissionStatus = async (): Promise<StatusCheckResponse> => {
+  try {
+    const response = await apiClient.get('/manuales/express/status');
+    return response.data;
+  } catch (error) {
+    console.error('Error checking express submission status:', error);
+    // Por seguridad, si falla la llamada, asumimos que la restricción está activa y no ha enviado.
+    return { hasSubmitted: false, isRestrictionActive: true };
+  }
+};
+
 export const FormService = {
   submitManualContrataciones,
   checkSubmissionStatus,
+  submitManualExpress, 
+  checkExpressSubmissionStatus, 
 };

@@ -1,25 +1,25 @@
-// app/(auth)/login.tsx
 import React, { useState } from 'react';
 import {
   View, Text, Image, TextInput, TouchableOpacity, SafeAreaView,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator
+  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router'; // 1. Volvemos a importar useRouter
+import { Link, useRouter } from 'expo-router';
 import Colors from '../../constants/Colors';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
   const { login, isLoading } = useAuth();
-  const router = useRouter(); // 2. Inicializamos el router
+  const router = useRouter(); // ✅ 2. Inicializamos el router
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [emailIsFocused, setEmailIsFocused] = useState(false);
+  const [passwordIsFocused, setPasswordIsFocused] = useState(false);
 
   const handleLogin = async () => {
     if (isLoading) return;
-
     if (!email || !password) {
       Alert.alert('Campos incompletos', 'Por favor, ingresa tu correo y contraseña.');
       return;
@@ -27,9 +27,10 @@ export default function LoginScreen() {
 
     const result = await login(email, password);
 
+    // ✅ 3. AÑADIMOS LA LÓGICA DE NAVEGACIÓN
     if (result.success) {
-      // 3. SI EL LOGIN ES EXITOSO, NAVEGAMOS MANUALMENTE
-      // Usamos 'replace' para que el usuario no pueda volver atrás a la pantalla de login.
+      // Si el login es exitoso, navegamos a la pantalla de Home.
+      // Usamos 'replace' para que el usuario no pueda volver atrás.
       router.replace('/(tabs)/home');
     } else {
       // Si falla, mostramos el error que viene del backend.
@@ -37,23 +38,25 @@ export default function LoginScreen() {
     }
   };
 
-  // El resto del componente (el JSX) se mantiene exactamente igual.
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}
       >
-        <View style={styles.container}>
-          {/* ... (Todo el JSX del logo, títulos y formulario sin cambios) ... */}
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+
+          {/* ✅ LOGO AÑADIDO */}
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-
           <View style={styles.header}>
-            <Text style={styles.title}>Bienvenido a Universitas</Text>
+            {/* ✅ CAMBIO: Título actualizado según la guía de estilo */}
+            <Text style={styles.title}>
+              Elaboración de{'\n'}Manuales de Contrataciones Públicas
+            </Text>
             <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
           </View>
 
@@ -61,19 +64,21 @@ export default function LoginScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Correo electrónico</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, emailIsFocused && styles.inputFocused]}
                 placeholder="Ingresa tu correo"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!isLoading}
+                onFocus={() => setEmailIsFocused(true)}
+                onBlur={() => setEmailIsFocused(false)}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Contraseña</Text>
-              <View style={styles.passwordContainer}>
+              <View style={[styles.passwordContainer, passwordIsFocused && styles.inputFocused]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Ingresa tu contraseña"
@@ -81,71 +86,141 @@ export default function LoginScreen() {
                   onChangeText={setPassword}
                   secureTextEntry={!isPasswordVisible}
                   editable={!isLoading}
+                  onFocus={() => setPasswordIsFocused(true)}
+                  onBlur={() => setPasswordIsFocused(false)}
                 />
                 <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} disabled={isLoading}>
                   <Feather name={isPasswordVisible ? 'eye-off' : 'eye'} size={22} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-
-          <TouchableOpacity
-            onPress={handleLogin}
-            style={[styles.button, isLoading && styles.buttonInactive]}
-            activeOpacity={0.8}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Iniciar Sesión</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.linksContainer}>
             <Link href="/(auth)/forgot-password" asChild>
                 <TouchableOpacity disabled={isLoading}>
-                    <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
+                    <Text style={styles.forgotLink}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
             </Link>
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={handleLogin}
+              style={[styles.button, isLoading && styles.buttonInactive]}
+              activeOpacity={0.8}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.textLight} />
+              ) : (
+                <Text style={styles.buttonText}>Iniciar sesión</Text>
+              )}
+            </TouchableOpacity>
             
             <View style={styles.registerLinkContainer}>
                 <Text style={styles.registerText}>¿No tienes cuenta? </Text>
                 <Link href="/(auth)/register" asChild>
                     <TouchableOpacity disabled={isLoading}>
-                        <Text style={[styles.link, { fontWeight: 'bold' }]}>Regístrate</Text>
+                        <Text style={styles.registerLink}>Regístrate AQUÍ</Text>
                     </TouchableOpacity>
                 </Link>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-// Los estilos se mantienen igual
+// ✅ CAMBIO: Estilos actualizados con la nueva paleta y tipografía
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  logo: { width: 200, height: 100, marginBottom: 40 },
-  header: { width: '100%', marginBottom: 32 },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: Colors.text },
-  subtitle: { fontSize: 16, textAlign: 'center', color: Colors.textSecondary, marginTop: 8 },
-  form: { width: '100%', gap: 20 },
-  inputGroup: {},
-  label: { fontSize: 16, fontWeight: '500', color: Colors.textSecondary, marginBottom: 8 },
-  input: { height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, fontSize: 16 },
-  passwordContainer: { flexDirection: 'row', alignItems: 'center', height: 56, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16 },
-  passwordInput: { flex: 1, fontSize: 16 },
-  button: { width: '100%', backgroundColor: Colors.primary, height: 56, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginTop: 32 },
-  buttonInactive: {
-    backgroundColor: '#cccccc',
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
+  header: { width: '100%', marginBottom: 32, alignItems: 'center' },
+  title: {
+    fontFamily: 'Roboto_500Medium',
+    fontSize: 24,
+    color: Colors.text,
+    textAlign: 'center',
   },
-  buttonText: { color: Colors.textLight, fontSize: 18, fontWeight: 'bold' },
-  linksContainer: { width: '100%', marginTop: 24, alignItems: 'center', gap: 16 },
-  link: { color: Colors.accent, fontSize: 16, fontWeight: '600' },
-  registerLinkContainer: { flexDirection: 'row', alignItems: 'center' },
-  registerText: { color: Colors.textSecondary, fontSize: 16 },
+  logo: {
+    width: 300, // Ajusta el tamaño según tu preferencia
+    height: 120,  // Ajusta el tamaño según tu preferencia
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontFamily: 'Roboto_400Regular',
+    fontSize: 16,
+    color: Colors.textSecondary,
+    marginTop: 8,
+  },
+  form: { width: '100%' },
+  inputGroup: { width: '100%', marginBottom: 16 },
+  label: {
+    fontFamily: 'Roboto_400Regular',
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  input: {
+    height: 56,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  inputFocused: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+  },
+  passwordInput: { flex: 1, fontSize: 16 },
+  forgotLink: {
+    fontFamily: 'Roboto_500Medium',
+    color: Colors.link,
+    textAlign: 'right',
+    fontSize: 14,
+  },
+  footer: { width: '100%', marginTop: 32 },
+  button: {
+    width: '100%',
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonInactive: { backgroundColor: '#9CA3AF' },
+  buttonText: {
+    fontFamily: 'Roboto_700Bold',
+    color: Colors.textLight,
+    fontSize: 16,
+  },
+  registerLinkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  registerText: {
+    fontFamily: 'Roboto_400Regular',
+    color: Colors.textSecondary,
+    fontSize: 14,
+  },
+  registerLink: {
+    fontFamily: 'Roboto_500Medium',
+    color: Colors.link,
+    fontSize: 14,
+  },
 });
