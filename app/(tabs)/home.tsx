@@ -64,7 +64,8 @@ const cardData = [
     id: '6',
     title: 'Formación',
     subtitle: 'Conoce nuestros cursos',
-    icon: { family: Feather, name: 'laptop' },
+    // ✅ CAMBIO: 'laptop' se reemplaza por 'monitor'
+    icon: { family: Feather, name: 'monitor' },
     buttonText: 'Ver cursos',
     buttonVariant: 'transparent',
     action: (router) => router.push('/courses'),
@@ -119,7 +120,10 @@ export default function HomeScreen() {
         <Text style={styles.headerTitle}>Manuales de Contrataciones</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.contentContainer}>
+
         <View style={styles.cardRow}>
           {cardData.map(card => (
             <Card
@@ -151,6 +155,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: Colors.background,
   },
+  // ✅ NUEVO ESTILO: Le dice al ScrollView que ocupe todo el espacio vertical disponible
+  scrollView: {
+    flex: 1,
+  },
   avatar: {
     width: 40,
     height: 40,
@@ -177,6 +185,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto_500Medium',
   },
   contentContainer: {
+    // ✅ AÑADE ESTA LÍNEA:
+    flexGrow: 1,
     padding: 8,
   },
   cardRow: {

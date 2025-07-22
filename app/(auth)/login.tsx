@@ -9,8 +9,9 @@ import Colors from '../../constants/Colors';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
-  const { login, isLoading } = useAuth();
-  const router = useRouter(); // ✅ 2. Inicializamos el router
+  // ✅ CAMBIO: Pide 'isLoginLoading' en lugar de 'isLoading'
+  const { login, isLoginLoading } = useAuth();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +20,7 @@ export default function LoginScreen() {
   const [passwordIsFocused, setPasswordIsFocused] = useState(false);
 
   const handleLogin = async () => {
-    if (isLoading) return;
+    if (isLoginLoading) return;
     if (!email || !password) {
       Alert.alert('Campos incompletos', 'Por favor, ingresa tu correo y contraseña.');
       return;
@@ -70,7 +71,7 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                editable={!isLoading}
+                editable={!isLoginLoading}
                 onFocus={() => setEmailIsFocused(true)}
                 onBlur={() => setEmailIsFocused(false)}
               />
@@ -85,17 +86,17 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!isPasswordVisible}
-                  editable={!isLoading}
+                  editable={!isLoginLoading}
                   onFocus={() => setPasswordIsFocused(true)}
                   onBlur={() => setPasswordIsFocused(false)}
                 />
-                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} disabled={isLoading}>
+                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} disabled={isLoginLoading}>
                   <Feather name={isPasswordVisible ? 'eye-off' : 'eye'} size={22} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
             <Link href="/(auth)/forgot-password" asChild>
-                <TouchableOpacity disabled={isLoading}>
+                <TouchableOpacity disabled={isLoginLoading}>
                     <Text style={styles.forgotLink}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
             </Link>
@@ -104,11 +105,11 @@ export default function LoginScreen() {
           <View style={styles.footer}>
             <TouchableOpacity
               onPress={handleLogin}
-              style={[styles.button, isLoading && styles.buttonInactive]}
+              style={[styles.button, isLoginLoading && styles.buttonInactive]}
               activeOpacity={0.8}
-              disabled={isLoading}
+              disabled={isLoginLoading}
             >
-              {isLoading ? (
+              {isLoginLoading ? (
                 <ActivityIndicator size="small" color={Colors.textLight} />
               ) : (
                 <Text style={styles.buttonText}>Iniciar sesión</Text>
@@ -118,7 +119,7 @@ export default function LoginScreen() {
             <View style={styles.registerLinkContainer}>
                 <Text style={styles.registerText}>¿No tienes cuenta? </Text>
                 <Link href="/(auth)/register" asChild>
-                    <TouchableOpacity disabled={isLoading}>
+                    <TouchableOpacity disabled={isLoginLoading}>
                         <Text style={styles.registerLink}>Regístrate AQUÍ</Text>
                     </TouchableOpacity>
                 </Link>

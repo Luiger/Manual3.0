@@ -81,6 +81,9 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
     height: 60,
+    // Añadimos un borde superior con el color primario
+    borderTopWidth: 1,
+    borderTopColor: Colors.primary, 
   },
   tabButton: {
     flex: 1,

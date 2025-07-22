@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Manual3-0",
+    "name": "Manual de Contrataciones",
     "slug": "manual3-0",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -34,7 +34,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1ddd9bdc-6b76-4a6f-be82-0c41f359fc1d"
+        "projectId": "5049c2bf-baa9-4198-bb08-89b78002e76d"
       }
     },
     "owner": "luiger"

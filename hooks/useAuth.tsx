@@ -1,11 +1,9 @@
-// hooks/useAuth.tsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import apiClient from '../services/apiClient';
 
-// ✅ CORRECCIÓN: Añadimos los campos opcionales a la interfaz del Usuario.
 interface User {
   Nombre: string;
   Apellido: string;
@@ -15,22 +13,24 @@ interface User {
   Cargo?: string;
 }
 
+// ✅ CAMBIO: Actualizamos la interfaz del contexto
 interface AuthContextData {
   user: User | null;
   token: string | null;
-  isLoading: boolean;
+  isSessionLoading: boolean; // Para la carga inicial de la app
+  isLoginLoading: boolean;   // Para la acción del botón de login
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
-// --- Creación del Contexto ---
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-// --- Creación del Proveedor (Provider) ---
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // ✅ CAMBIO: Renombramos el estado de carga y añadimos uno nuevo
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   useEffect(() => {
     async function loadUserFromStorage() {
@@ -47,74 +47,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {
         console.error('Error al cargar datos de sesión:', e);
       } finally {
-        setIsLoading(false);
+        // ✅ CAMBIO: Este 'loading' corresponde a la carga de la sesión
+        setIsSessionLoading(false);
       }
     }
-
     loadUserFromStorage();
   }, []);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
+    // ✅ CAMBIO: Este 'loading' es solo para la acción de login
+    setIsLoginLoading(true);
     try {
-      // Intenta hacer el login
       const response = await AuthService.login(email, password);
-
       if (!response.success || !response.token) {
-        // Si el login falla, lanzamos un error para ser capturado por el catch.
         throw new Error(response.error || 'Credenciales inválidas.');
       }
-
-      // Si el login tiene éxito, procedemos a configurar la sesión
       const newToken = response.token;
       setToken(newToken);
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
-      // Intentamos obtener el perfil del usuario
       const profileResponse = await UserService.getProfile();
       if (profileResponse.success && profileResponse.data) {
         setUser(profileResponse.data);
       } else {
-        // Si el perfil falla, aún consideramos el login exitoso pero advertimos.
         console.warn('Login exitoso, pero no se pudo obtener el perfil.');
       }
-
       await SecureStore.setItemAsync('userToken', newToken);
       return { success: true };
-
     } catch (error: any) {
-      // Si cualquier paso falla, lo capturamos aquí.
-      //console.error('Error en el proceso de login:', error);
-      // Limpiamos cualquier estado inconsistente.
       await AuthService.logout();
       setUser(null);
       setToken(null);
       return { success: false, error: error.message };
     } finally {
-      // ✅ IMPORTANTE: Este bloque se ejecuta siempre, ya sea éxito o error.
-      // Esto garantiza que el spinner de carga siempre se detenga.
-      setIsLoading(false);
+      // ✅ CAMBIO: Detenemos el 'loading' de la acción de login
+      setIsLoginLoading(false);
     }
   };
 
   const logout = async () => {
-    setIsLoading(true);
+    // La lógica de logout se mantiene, pero sin manejar el loading aquí para simplicidad
     await AuthService.logout();
     delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
     setToken(null);
     await SecureStore.deleteItemAsync('userToken');
-    setIsLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    // ✅ CAMBIO: Pasamos los nuevos estados al provider
+    <AuthContext.Provider value={{ user, token, isSessionLoading, isLoginLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// --- Creación del Hook 'useAuth' ---
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
