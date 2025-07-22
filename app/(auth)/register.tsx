@@ -150,7 +150,12 @@ const RegisterCredentialsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  scrollContainer: { flexGrow: 1, padding: 24, justifyContent: 'space-between' },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 40,
+  },
   header: { marginBottom: 24 },
   title: {
     fontFamily: 'Roboto_700Bold',

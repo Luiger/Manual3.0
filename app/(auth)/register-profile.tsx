@@ -104,7 +104,7 @@ const RegisterProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}
@@ -161,7 +161,12 @@ const RegisterProfileScreen = () => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  scrollContainer: { flexGrow: 1, padding: 24, justifyContent: 'space-between' },
+  scrollContainer: {
+        flexGrow: 1,
+        paddingHorizontal: 24,
+        paddingTop: 10,
+        paddingBottom: 40,
+    },
   header: { marginBottom: 24 },
   title: {
     fontFamily: 'Roboto_700Bold',
@@ -194,7 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Roboto_400Regular',
   },
-  footer: { marginTop: 40 },
+  footer: { marginTop: 20 },
   errorText: { color: Colors.error, textAlign: 'center', marginBottom: 10, fontFamily: 'Roboto_400Regular' },
   button: {
     width: '100%',

@@ -18,7 +18,7 @@ export default function AuthLayout() {
 
         // Creamos nuestro propio botón de "volver" personalizado
         headerLeft: () => (
-          <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: 8 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: 4 }}>
             <Ionicons name="arrow-back" size={28} color={Colors.text} />
           </TouchableOpacity>
         ),
