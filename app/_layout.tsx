@@ -48,6 +48,9 @@ export default function RootLayout() {
               name="manual-form" // Corregido para coincidir con nuestro nombre de archivo
               options={{ title: 'Manual de Contrataciones' }}
             />
+            
+            <Stack.Screen name="repository" options={{ title: 'Repositorio Legal' }} />
+            <Stack.Screen name="courses" options={{ title: 'Cursos Virtuales' }} />
           </Stack>
         </SafeAreaProvider>
       </GestureHandlerRootView>

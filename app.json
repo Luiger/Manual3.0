@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Manual3-0",
-    "slug": "Manual3-0",
+    "slug": "manual3-0",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -33,8 +33,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "361d5e51-7a9c-495b-88ff-8057c2574240"
+        "projectId": "1ddd9bdc-6b76-4a6f-be82-0c41f359fc1d"
       }
-    }
+    },
+    "owner": "luiger"
   }
 }
