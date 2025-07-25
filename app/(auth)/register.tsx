@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   passwordInput: { flex: 1, fontSize: 16, fontFamily: 'Roboto_400Regular' },
-  footer: { marginTop: 40 },
+  footer: { marginTop: 30 },
   errorText: { color: Colors.error, textAlign: 'center', marginBottom: 10, fontFamily: 'Roboto_400Regular' },
   button: {
     width: '100%',

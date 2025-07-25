@@ -1,12 +1,11 @@
-// constants/Colors.ts
-
 const Colors = {
   // Colores Principales
   background: '#f1f2f6',
   primary: '#1d2342',
   
   // Colores de Acento
-  accentPRO: '#e94969',
+  //accentPRO: '#e94969',
+  accentPRO: '#e73746',
   accentExpress: '#ffedd5',
   
   // Colores de Texto y Enlaces
@@ -16,10 +15,10 @@ const Colors = {
   link: '#1f3c87',
   
   // Colores de Estado y Bordes
-  error: '#e94969',
+  //error: '#e94969',
+  error: '#e73746',
   border: '#D1D1D6',
   
-  // ✅ CLAVE AÑADIDA
   surface: '#FFFFFF', // Blanco para el fondo de los inputs y tarjetas
 };
 

@@ -1,19 +1,30 @@
 import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome6 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
+import { useAuth } from '../../hooks/useAuth';
 
-// ✅ 1. CREAMOS NUESTRO COMPONENTE DE BARRA DE PESTAÑAS PERSONALIZADO
+// COMPONENTE DE BARRA DE PESTAÑAS PERSONALIZADO
 const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const { user } = useAuth(); // Obtenemos el usuario (y su rol)
+
+  // Filtramos las rutas que el usuario puede ver
+  const visibleRoutes = state.routes.filter(route => {
+    if (route.name === 'assistant' && user?.Rol === 'Usuario Gratis') return false;
+    if (route.name === 'users' && user?.Rol !== 'Admin') return false;
+    return true;
+  });
+
   return (
     // SafeAreaView para respetar los bordes inferiores
     <SafeAreaView edges={['bottom']} style={{ backgroundColor: Colors.primary }}>
       <View style={styles.tabBarContainer}>
-        {state.routes.map((route, index) => {
+        {visibleRoutes.map((route) => {
           const { options } = descriptors[route.key];
-          const isFocused = state.index === index;
+
+          const isFocused = state.routes[state.index].name === route.name;
 
           const onPress = () => {
             const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
@@ -23,18 +34,28 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           };
 
           // Define el ícono y el color según la pestaña y si está activa
+          let IconComponent;
           let iconName;
           let tabStyle;
           let textColor;
 
           if (route.name === 'home') {
-            iconName = isFocused ? 'home' : 'home-outline';
-            tabStyle = styles.tabLeft;
-            textColor = isFocused ? Colors.primary : Colors.textSecondary;
-          } else if (route.name === 'assistant') {
-            iconName = isFocused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
-            tabStyle = styles.tabRight;
-            textColor = Colors.textLight;
+            IconComponent = Ionicons;
+            iconName = isFocused ? 'home' : 'home';
+            tabStyle = isFocused ? styles.tabLeft : styles.tabRight;
+            textColor = isFocused ? Colors.primary : Colors.textLight;
+          } 
+          else if (route.name === 'assistant') {
+            IconComponent = Ionicons;
+            iconName = isFocused ? 'chatbubble-ellipses' : 'chatbubble-ellipses';
+            tabStyle = isFocused ? styles.tabLeft : styles.tabRight;
+            textColor = isFocused ? Colors.primary : Colors.textLight;
+          }
+          else if (route.name === 'users') {
+            IconComponent = FontAwesome6;
+            iconName = isFocused ? 'user-group' : 'user-group';
+            tabStyle = isFocused ? styles.tabLeft : styles.tabRight;
+            textColor = isFocused ? Colors.primary : Colors.textLight;
           }
 
           return (
@@ -43,7 +64,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
               onPress={onPress}
               style={[styles.tabButton, tabStyle]}
             >
-              <Ionicons name={iconName} size={24} color={textColor} />
+              {IconComponent && <IconComponent name={iconName} size={24} color={textColor} />}
+
               <Text style={[styles.tabLabel, { color: textColor }]}>
                 {options.title}
               </Text>
@@ -60,10 +82,11 @@ export default function TabsLayout() {
   return (
     // ✅ 2. USAMOS LA PROPIEDAD 'tabBar' PARA RENDERIZAR NUESTRO COMPONENTE PERSONALIZADO
     <Tabs
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ 
+        headerShown: false     
+       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      {/* ✅ 3. DEFINIMOS LAS DOS PANTALLAS DE LA BARRA DE PESTAÑAS */}
       <Tabs.Screen
         name="home"
         options={{ title: 'Inicio' }}
@@ -71,6 +94,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="assistant"
         options={{ title: 'Asistente IA' }}
+      />
+      <Tabs.Screen 
+        name="users" 
+        options={{ title: 'Usuarios' }} 
       />
     </Tabs>
   );
@@ -80,7 +107,7 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
-    height: 60,
+    height: 60,    
     // Añadimos un borde superior con el color primario
     borderTopWidth: 1,
     borderTopColor: Colors.primary, 

@@ -129,7 +129,7 @@ const ForgotPasswordScreen = () => {
                 return (
                     <>
                         <Text style={styles.title}>Verificar código</Text>
-                        <Text style={styles.subtitle}>Hemos enviado un código a <Text style={{fontWeight: 'bold'}}>{email}</Text></Text>
+                        <Text style={styles.subtitle}>Hemos enviado un código a {'\n'}<Text style={{fontWeight: 'bold'}}>{email}</Text></Text>
                         <Stepper currentStep={2} />
                         <View style={styles.inputContainer}><Text style={styles.label}>Código de Verificación</Text><TextInput style={styles.input} placeholder="123456" value={otp} onChangeText={setOtp} keyboardType="number-pad" maxLength={6} /></View>
                         <TouchableOpacity style={[styles.button, !isStepValid && styles.buttonDisabled]} onPress={handleVerifyOtp} disabled={!isStepValid || loading}>

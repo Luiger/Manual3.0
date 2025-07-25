@@ -10,6 +10,7 @@ interface ProfileData {
   Institucion: string;
   Cargo: string;
   Email: string;
+  Rol: string;
 }
 
 interface ApiResponse {
@@ -64,9 +65,33 @@ const changePassword = async (newPassword) => {
   }
 };
 
+// Función para obtener todos los usuarios (solo para admins)
+const getAllUsers = async () => {
+  try {
+    const response = await apiClient.get('/user/admin/users');
+    return response.data;
+  } catch (error) {
+    const errorMessage = axios.isAxiosError(error) ? error.response?.data?.message : 'Error al obtener todos los usuarios';
+    return { success: false, error: errorMessage };
+  }
+};
+
+// Función para actualizar el rol de un usuario (solo para admins)
+const updateUserRole = async (email: string, newRole: string) => {
+  try {
+    const response = await apiClient.put('/user/admin/role', { email, newRole });
+    return response.data;
+  } catch (error) {
+    const errorMessage = axios.isAxiosError(error) ? error.response?.data?.message : 'Error al actualizar el rol de un usuario';
+    return { success: false, error: errorMessage };
+  }
+};
+
 export const UserService = {
   getProfile,
   updateProfile,
   verifyPassword,
   changePassword,
+  getAllUsers,
+  updateUserRole,
 };

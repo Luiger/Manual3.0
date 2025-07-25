@@ -56,7 +56,7 @@ export default function LoginScreen() {
           <View style={styles.header}>
             {/* ✅ CAMBIO: Título actualizado según la guía de estilo */}
             <Text style={styles.title}>
-              Elaboración de{'\n'}Manuales de Contrataciones Públicas
+              Manuales de Contrataciones Públicas
             </Text>
             <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
           </View>
@@ -135,7 +135,10 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
+  scrollContainer: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    padding: 24 },
   header: { width: '100%', marginBottom: 32, alignItems: 'center' },
   title: {
     fontFamily: 'Roboto_500Medium',
@@ -144,8 +147,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   logo: {
-    width: 300, // Ajusta el tamaño según tu preferencia
-    height: 120,  // Ajusta el tamaño según tu preferencia
+    width: 400, // Ajusta el tamaño según tu preferencia
+    height: 200,  // Ajusta el tamaño según tu preferencia
     alignSelf: 'center',
     marginBottom: 10,
   },

@@ -10,12 +10,10 @@ import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../hooks/useAuth';
 import { FormService } from '../services/form.service';
 import Colors from '../constants/Colors';
+import * as Linking from 'expo-linking';
 
 // Esquema de validación actualizado
 const validationSchema = Yup.object().shape({
-  // Este campo es opcional, pero si se escribe, debe tener formato de email.
-  emailPrincipal: Yup.string().email('Formato de email no válido'),
-  // El resto de los campos siguen siendo obligatorios.
   nombreInstitucion: Yup.string().required('Campo requerido'),
   siglasInstitucion: Yup.string().required('Campo requerido'),
   unidadGestion: Yup.string().required('Campo requerido'),
@@ -27,9 +25,31 @@ const validationSchema = Yup.object().shape({
 const ManualProFormScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
+
+  // useEffect para la restricción de rol
+  useEffect(() => {
+    if (user?.Rol === 'Usuario Gratis') {
+      Alert.alert(
+        '¿Quieres adquirir la Versión Pro?',
+        'Obtén acceso a todas las modalidades y asegura el cumplimiento total.',
+        [
+          { text: 'Volver', style: 'cancel', onPress: () => router.back() },
+          { 
+            text: 'Adquirir Pro', 
+            style: 'default', 
+            onPress: () => Linking.openURL('https://universitas.legal/contrataciones-publicas/')
+          }
+        ]
+      );
+    }
+  }, [user]);
+
+  // Si es un usuario gratis, podríamos no renderizar nada para que solo vea la alerta
+  if (user?.Rol === 'Usuario Gratis') {
+    return <View style={styles.safeArea} />; // Muestra un fondo vacío
+  }
   
   const [formData, setFormData] = useState({
-    emailPrincipal: '',
     nombreInstitucion: '',
     siglasInstitucion: '',
     unidadGestion: '',
@@ -59,7 +79,6 @@ const ManualProFormScreen = () => {
 
     try {
         const payload = {
-            'Dirección de correo electrónico': formData.emailPrincipal,
             'Nombre de la Institución / Ente / Órgano': formData.nombreInstitucion,
             'Acrónimo y/o siglas de la Institución / Ente / Órgano': formData.siglasInstitucion,
             'Nombre de la Unidad / Gerencia y/u Oficina responsable de la Gestión Administrativa y Financiera de la Institución / Ente / Órgano': formData.unidadGestion,
@@ -91,19 +110,6 @@ const ManualProFormScreen = () => {
           <View style={styles.header}>
             <Text style={styles.title}>Elabora tu manual PRO</Text>
             <Text style={styles.subtitle}>Completa los siguientes campos para generar la base de tu manual. Una vez elaborado, lo recibirás en tu correo en formato de Google Docs, listo para que lo personalices.</Text>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Dirección de correo electrónico (Opcional)</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.emailPrincipal}
-              onChangeText={(val) => handleInputChange('emailPrincipal', val)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="none"
-            />
           </View>
 
           <View style={styles.inputGroup}>
@@ -142,7 +148,8 @@ const ManualProFormScreen = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              textContentType="none"
+              textContentType="none" // Para iOS
+              autoComplete="off"     // Para Android
             />
           </View>
 

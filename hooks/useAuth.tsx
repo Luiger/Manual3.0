@@ -3,17 +3,19 @@ import * as SecureStore from 'expo-secure-store';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import apiClient from '../services/apiClient';
+import { jwtDecode } from 'jwt-decode';
 
 interface User {
   Nombre: string;
   Apellido: string;
   Email: string;
+  Rol: string;
   Telefono?: string;
   Institucion?: string;
   Cargo?: string;
 }
 
-// ✅ CAMBIO: Actualizamos la interfaz del contexto
+// Actualizamos la interfaz del contexto
 interface AuthContextData {
   user: User | null;
   token: string | null;
@@ -28,7 +30,7 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  // ✅ CAMBIO: Renombramos el estado de carga y añadimos uno nuevo
+  // Renombramos el estado de carga y añadimos uno nuevo
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
 
@@ -37,6 +39,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const storedToken = await SecureStore.getItemAsync('userToken');
         if (storedToken) {
+          // Decodificamos el token para leer el rol al inicio
+          const decodedToken: { email: string; rol: string } = jwtDecode(storedToken);
           setToken(storedToken);
           apiClient.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
           const response = await UserService.getProfile();
@@ -45,9 +49,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } catch (e) {
+        // Token inválido o expirado, lo limpiamos
+        await SecureStore.deleteItemAsync('userToken');
         console.error('Error al cargar datos de sesión:', e);
       } finally {
-        // ✅ CAMBIO: Este 'loading' corresponde a la carga de la sesión
+        // Este 'loading' corresponde a la carga de la sesión
         setIsSessionLoading(false);
       }
     }
@@ -55,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    // ✅ CAMBIO: Este 'loading' es solo para la acción de login
+    // Este 'loading' es solo para la acción de login
     setIsLoginLoading(true);
     try {
       const response = await AuthService.login(email, password);
@@ -63,12 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(response.error || 'Credenciales inválidas.');
       }
       const newToken = response.token;
+      // Decodificamos el nuevo token para obtener el rol inmediatamente
+      const decodedToken: { email: string; rol: string } = jwtDecode(newToken);
       setToken(newToken);
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      // Actualizamos el usuario con el perfil del servidor
       const profileResponse = await UserService.getProfile();
       if (profileResponse.success && profileResponse.data) {
         setUser(profileResponse.data);
       } else {
+        // Creamos un usuario temporal si el perfil falla, pero con el rol del token
+        setUser({ Email: decodedToken.email, Rol: decodedToken.rol, Nombre: '', Apellido: '' });
         console.warn('Login exitoso, pero no se pudo obtener el perfil.');
       }
       await SecureStore.setItemAsync('userToken', newToken);
@@ -79,13 +90,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(null);
       return { success: false, error: error.message };
     } finally {
-      // ✅ CAMBIO: Detenemos el 'loading' de la acción de login
+      //  Detenemos el 'loading' de la acción de login
       setIsLoginLoading(false);
     }
   };
 
   const logout = async () => {
-    // La lógica de logout se mantiene, pero sin manejar el loading aquí para simplicidad
     await AuthService.logout();
     delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
@@ -94,7 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    // ✅ CAMBIO: Pasamos los nuevos estados al provider
     <AuthContext.Provider value={{ user, token, isSessionLoading, isLoginLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
