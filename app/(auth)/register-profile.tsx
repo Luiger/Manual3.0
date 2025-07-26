@@ -52,7 +52,7 @@ const RegisterProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right',]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}
@@ -123,16 +123,16 @@ const RegisterProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
   // ✅ SOLUCIÓN: Un estilo simple solo con padding.
   // Se elimina 'flexGrow' y 'justifyContent'.
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    //padding: 24, paddingTop: 16,
-    paddingBottom: 40, // Espacio para respetar el límite inferior
+    justifyContent: 'center',
+    padding: 20, // Espacio para respetar el límite inferior
   },
   header: { marginBottom: 24 },
   title: { fontFamily: 'Roboto_700Bold', fontSize: 24, textAlign: 'center', marginBottom: 8, color: Colors.text },

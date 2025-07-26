@@ -19,10 +19,10 @@ interface FormDataState {
 }
 
 const FORM_FIELDS: { key: keyof FormDataState; label: string; }[] = [
-  { key: 'nombreInstitucion', label: '1. Indique el nombre de la institución, ente u órgano.' },
-  { key: 'siglasInstitucion', label: '2. Indique el acrónimo y/o siglas de la institución.' },
-  { key: 'unidadGestion', label: '3. Indique el nombre de la unidad responsable de la gestión administrativa y financiera.' },
-  { key: 'unidadSistemas', label: '4. Indique el nombre de la unidad responsable del área de sistema y tecnología.' },
+  { key: 'nombreInstitucion', label: '1. Indique el Nombre de la Institución / Ente / Órgano.' },
+  { key: 'siglasInstitucion', label: '2. Indique el Acrónimo y/o siglas de la Institución / Ente / Órgano.' },
+  { key: 'unidadGestion', label: '3. Indique el Nombre de la Unidad / Gerencia y/u Oficina responsable de la Gestión Administrativa y Financiera.' },
+  { key: 'unidadSistemas', label: '4. Indique el Nombre de la Unidad / Gerencia y/u Oficina responsable del Área de Sistema y Tecnología.' },
 ];
 
 const validationSchema = Yup.object().shape({
@@ -46,18 +46,20 @@ const ManualExpressFormScreen = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState('');
 
-  // La verificación ahora corre en segundo plano sin bloquear la UI
   useEffect(() => {
     const verifyStatus = async () => {
       try {
         const { hasSubmitted, isRestrictionActive } = await FormService.checkExpressSubmissionStatus();
         if (isRestrictionActive && hasSubmitted) {
           Alert.alert('Límite alcanzado', 'Ya has llenado este formulario.', [{ text: 'OK', onPress: () => router.back() }]);
+        } else {
+          setIsVerifying(false);
         }
       } catch (e) {
-        console.error('Error al verificar el estado del formulario Express:', e);
+        Alert.alert('Error', 'No se pudo verificar el estado.', [{ text: 'OK', onPress: () => router.back() }]);
       }
     };
     verifyStatus();
@@ -76,11 +78,12 @@ const ManualExpressFormScreen = () => {
     setError('');
     setIsSubmitting(true);
     try {
+      // ✅ CORRECCIÓN: Las claves del payload ahora coinciden EXACTAMENTE con las del backend.
       const payload = {
-        'Indique el nombre de la institución, ente u órgano.': formData.nombreInstitucion,
-        'Indique el acrónimo y/o siglas de la institución.': formData.siglasInstitucion,
+        'Indique el Nombre de la Institución / Ente / Órgano.': formData.nombreInstitucion,
+        'Indique el Acrónimo y/o siglas de la Institución / Ente / Órgano.': formData.siglasInstitucion,
         'Indique el Nombre de la Unidad / Gerencia y/u Oficina responsable de la Gestión Administrativa y Financiera de la Institución / Ente / Órgano.': formData.unidadGestion,
-        'Indique el nombre de la unidad responsable del área de sistema y tecnología.': formData.unidadSistemas,
+        'Indique el Nombre de la Unidad / Gerencia y/u Oficina responsable del Área de Sistema y Tecnología de la Institución / Ente / Órgano.': formData.unidadSistemas,
       };
       const result = await FormService.submitManualExpress(payload);
       if (result.success) {
@@ -95,10 +98,26 @@ const ManualExpressFormScreen = () => {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.container}>
+  if (isVerifying) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Verificando estado...</Text>
+      </View>
+    );
+  }
+
+   return (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Elabora tu manual express</Text>
             <Text style={styles.subtitle}>Ingresa los datos básicos para generar una demostración del manual de concurso abierto. Lo recibirás en tu correo en pocos minutos.</Text>
@@ -110,10 +129,13 @@ const ManualExpressFormScreen = () => {
               <TextInput style={styles.input} value={formData[field.key]} onChangeText={(val) => handleInputChange(field.key, val)} />
             </View>
           ))}
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <TouchableOpacity style={[styles.button, (!isFormValid || isSubmitting) && styles.buttonDisabled, styles.buttonExpress]} onPress={handleSubmit} disabled={!isFormValid || isSubmitting}>
-            {isSubmitting ? <ActivityIndicator color={Colors.primary} /> : <Text style={styles.buttonTextExpress}>Elaborar manual</Text>}
-          </TouchableOpacity>
+          
+          <View style={styles.footer}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <TouchableOpacity style={[styles.button, (!isFormValid || isSubmitting) && styles.buttonDisabled, styles.buttonExpress]} onPress={handleSubmit} disabled={!isFormValid || isSubmitting}>
+              {isSubmitting ? <ActivityIndicator color={Colors.primary} /> : <Text style={styles.buttonTextExpress}>Elaborar manual</Text>}
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -123,10 +145,16 @@ const ManualExpressFormScreen = () => {
 // --- ESTILOS ---
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
-  container: {
-    padding: 24,
-    paddingBottom: 48, // Padding consistente para un buen espaciado inferior
+  scrollContainer: { 
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 40,
   },
+  footer: {
+    marginTop: 16, // Margen para separar del último campo
+  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
+  loadingText: { fontFamily: 'Roboto_400Regular', marginTop: 16, fontSize: 16, color: Colors.textSecondary },
   header: { marginBottom: 32, alignItems: 'center' },
   title: { fontFamily: 'Roboto_700Bold', fontSize: 22, color: Colors.text, textAlign: 'center' },
   subtitle: { fontFamily: 'Roboto_400Regular', fontSize: 15, color: Colors.textSecondary, textAlign: 'center', marginTop: 12, lineHeight: 22 },
