@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TextInput, ScrollView,
   TouchableOpacity, Alert, ActivityIndicator, KeyboardAvoidingView, Platform
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Yup from 'yup';
 import { Feather } from '@expo/vector-icons';
@@ -23,6 +23,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const ManualProFormScreen = () => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -44,7 +45,7 @@ const ManualProFormScreen = () => {
     }
   }, [user]);
 
-  // Si es un usuario gratis, podríamos no renderizar nada para que solo vea la alerta
+  // Si es un usuario gratis, no se renderiza, solo se visualiza la alerta
   if (user?.Rol === 'Usuario Gratis') {
     return <View style={styles.safeArea} />; // Muestra un fondo vacío
   }
@@ -101,12 +102,20 @@ const ManualProFormScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={{flex: 1,
+      paddingTop: insets.top - 60,
+      paddingBottom: insets.bottom - 48,
+      backgroundColor: Colors.background,}} >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView 
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Elabora tu manual PRO</Text>
             <Text style={styles.subtitle}>Completa los siguientes campos para generar la base de tu manual. Una vez elaborado, lo recibirás en tu correo en formato de Google Docs, listo para que lo personalices.</Text>
@@ -175,7 +184,10 @@ const ManualProFormScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
-  container: { padding: 24, paddingBottom: 48 },
+  container: { 
+    padding: 20,
+    paddingBottom: 40,
+  },
   header: { marginBottom: 32, alignItems: 'center' },
   title: { fontFamily: 'Roboto_700Bold', fontSize: 22, color: Colors.text, textAlign: 'center' },
   subtitle: { fontFamily: 'Roboto_400Regular', fontSize: 15, color: Colors.textSecondary, textAlign: 'center', marginTop: 12, lineHeight: 22 },

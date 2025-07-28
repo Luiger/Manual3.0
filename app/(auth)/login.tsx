@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import {
-  View, Text, Image, TextInput, TouchableOpacity, SafeAreaView,
+  View, Text, Image, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import Colors from '../../constants/Colors';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginScreen() {
-  // ✅ CAMBIO: Pide 'isLoginLoading' en lugar de 'isLoading'
+  const insets = useSafeAreaInsets();
+  // CAMBIO: Se pide 'isLoginLoading' en lugar de 'isLoading'
   const { login, isLoginLoading } = useAuth();
   const router = useRouter();
 
@@ -40,21 +42,29 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={{
+      flex: 1,
+      paddingTop: 0,
+      paddingBottom: 0,
+      backgroundColor: Colors.background,
+    }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoiding}
+        style={{ flex: 1 }}
+        behavior="padding"                                
+        keyboardVerticalOffset={0} 
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-          {/* ✅ LOGO AÑADIDO */}
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"          
+        >
+          {/* Logo y título */}
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
           <View style={styles.header}>
-            {/* ✅ CAMBIO: Título actualizado según la guía de estilo */}
             <Text style={styles.title}>
               Manuales de Contrataciones Públicas
             </Text>
@@ -133,12 +143,14 @@ export default function LoginScreen() {
 
 // ✅ CAMBIO: Estilos actualizados con la nueva paleta y tipografía
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.background },
-  keyboardAvoiding: { flex: 1 },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: Colors.background },
   scrollContainer: { 
-    flexGrow: 1, 
-    justifyContent: 'center', 
-    padding: 24 },
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 10,
+  },
   header: { width: '100%', marginBottom: 32, alignItems: 'center' },
   title: {
     fontFamily: 'Roboto_500Medium',

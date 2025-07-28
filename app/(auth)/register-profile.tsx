@@ -64,8 +64,8 @@ const RegisterProfileScreen = () => {
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"          
         >
         
           <View style={styles.header}>
@@ -132,11 +132,11 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: Colors.background },
   keyboardAvoiding: { flex: 1 },
-  // ✅ SOLUCIÓN: Un estilo simple solo con padding.
+  // Un estilo simple solo con padding.
   // Se elimina 'flexGrow' y 'justifyContent'.
   scrollContainer: {
     padding: 20,
-  paddingBottom: 40,
+    paddingBottom: 40,
   },
   header: { marginBottom: 24 },
   title: { fontFamily: 'Roboto_700Bold', fontSize: 24, textAlign: 'center', marginBottom: 8, color: Colors.text },

@@ -3,7 +3,7 @@ import {
   StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity,
   KeyboardAvoidingView, Platform, Alert, ActivityIndicator
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Yup from 'yup';
 import { useAuth } from '../hooks/useAuth';
@@ -34,6 +34,7 @@ const validationSchema = Yup.object().shape({
 
 // --- COMPONENTE PRINCIPAL ---
 const ManualExpressFormScreen = () => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -108,10 +109,14 @@ const ManualExpressFormScreen = () => {
   }
 
    return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={{flex: 1,
+      paddingTop: insets.top - 60,
+      paddingBottom: insets.bottom - 48,
+      backgroundColor: Colors.background,}} >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
@@ -144,10 +149,11 @@ const ManualExpressFormScreen = () => {
 
 // --- ESTILOS ---
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.background },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: Colors.background },
   scrollContainer: { 
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    padding: 20,
     paddingBottom: 40,
   },
   footer: {
