@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
   Platform, Alert, KeyboardAvoidingView, ScrollView, TextInput
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, Link } from 'expo-router';
 import * as Yup from 'yup';
 import * as SecureStore from 'expo-secure-store';
@@ -24,6 +24,7 @@ const validationSchema = Yup.object().shape({
 
 // --- Componente Principal ---
 const RegisterProfileScreen = () => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [profile, setProfile] = useState({ Nombre: '', Apellido: '', Telefono: '', Institucion: '', Cargo: '' });
   const [isFormValid, setIsFormValid] = useState(false);
@@ -52,10 +53,14 @@ const RegisterProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right',]}>
+    <SafeAreaView style={{flex: 1,
+      paddingTop: insets.top - 60,
+      paddingBottom: insets.bottom - 48,
+      backgroundColor: Colors.background,}} >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoiding}
+        style={{ flex: 1 }}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} 
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
@@ -130,9 +135,8 @@ const styles = StyleSheet.create({
   // ✅ SOLUCIÓN: Un estilo simple solo con padding.
   // Se elimina 'flexGrow' y 'justifyContent'.
   scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20, // Espacio para respetar el límite inferior
+    padding: 20,
+  paddingBottom: 40,
   },
   header: { marginBottom: 24 },
   title: { fontFamily: 'Roboto_700Bold', fontSize: 24, textAlign: 'center', marginBottom: 8, color: Colors.text },
